@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>Open trip</title>
+<style>
+  :root { --bg: #fff; --fg: #1b1b1f; --muted: #5c5f66; --accent: #1a5fb4; --on-accent: #fff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121316; --fg: #e4e4e8; --muted: #a0a3ab; --accent: #8ab4f8; --on-accent: #0b1a33; }
+  }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 26rem; margin: 0 auto; padding: 4rem 1.25rem; text-align: center; }
+  h1 { font-size: 1.4rem; margin: 0 0 .5rem; }
+  p { color: var(--muted); margin: .5rem 0 1.5rem; }
+  a.button { display: block; padding: .85rem 1rem; border-radius: .75rem; background: var(--accent);
+    color: var(--on-accent); font-weight: 600; text-decoration: none; margin-bottom: 1rem; }
+  a.link { color: var(--accent); }
+  [hidden] { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <section id="invalid" hidden>
+    <h1>Not a valid trip link</h1>
+    <p>This link is missing the trip information.</p>
+  </section>
+  <section id="trip" hidden>
+    <h1>Opening trip…</h1>
+    <p>If nothing happens, choose how to open it.</p>
+    <a id="app" class="button" href="#">Open in Transportia</a>
+    <a id="web" class="link" href="#">Open in the browser</a>
+  </section>
+</main>
+<script>
+(function () {
+  var HOST_RE = /^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*(:\d{1,5})?$/;
+  var DEFAULT_HOST = "api.transitous.org";
+  var PACKAGE = "io.github.blauertee.transportia";
+
+  var params = new URLSearchParams(location.search);
+  var id = params.get("itineraryId");
+  var host = params.get("host");
+  if (host === null || host === "") host = DEFAULT_HOST;
+
+  if (!id || !HOST_RE.test(host)) {
+    document.getElementById("invalid").hidden = false;
+    return;
+  }
+
+  var webUrl = new URL("https://" + host + "/");
+  webUrl.searchParams.set("itineraryId", id);
+  var web = webUrl.href;
+
+  var q = new URLSearchParams();
+  q.set("itineraryId", id);
+  q.set("host", host);
+  var intent = "intent://trip?" + q.toString() +
+    "#Intent;scheme=motis;package=" + PACKAGE +
+    ";S.browser_fallback_url=" + encodeURIComponent(web) + ";end";
+
+  document.getElementById("app").href = intent;
+  document.getElementById("web").href = web;
+  document.getElementById("trip").hidden = false;
+
+  var ua = navigator.userAgent || "";
+  if (/Android/i.test(ua)) location.replace(intent);
+  else location.replace(web);
+})();
+</script>
+</body>
+</html>
