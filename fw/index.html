@@ -59,17 +59,31 @@
   var q = new URLSearchParams();
   q.set("itineraryId", id);
   q.set("host", host);
-  var intent = "intent://trip?" + q.toString() +
-    "#Intent;scheme=motis" +
+  var appIntent = "intent://trip?" + q.toString() + "#Intent;scheme=motis";
+  // Chrome launches an app straight away only when the navigation chain
+  // allows it: a tap, or a redirect soon after another app opened this page.
+  // Otherwise (pasted or typed URL, reload, back) it asks first, unless the
+  // intent carries a browser_fallback_url: then it loads the fallback without
+  // asking. So the automatic redirect has no fallback and stays on this page
+  // if no app takes it; only the button, which follows a tap, gets one.
+  var autoIntent = appIntent + ";end";
+  var buttonIntent = appIntent +
     ";S.browser_fallback_url=" + encodeURIComponent(web) + ";end";
 
-  document.getElementById("app").href = intent;
+  document.getElementById("app").href = buttonIntent;
   document.getElementById("web").href = web;
   document.getElementById("trip").hidden = false;
 
   var ua = navigator.userAgent || "";
-  if (/Android/i.test(ua)) location.replace(intent);
-  else location.replace(web);
+  if (!/Android/i.test(ua)) {
+    location.replace(web);
+    return;
+  }
+  // In-app WebViews don't handle intent: URLs and would replace this page
+  // with an error; leave the choice to the buttons there.
+  if (/; wv\)/.test(ua)) return;
+
+  location.replace(autoIntent);
 })();
 </script>
 </body>
