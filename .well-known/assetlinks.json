@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.blauertee.transportia",
+    "sha256_cert_fingerprints": [
+      "C0:63:01:37:14:C6:4E:F5:A4:FC:20:DE:A5:8D:35:FF:19:45:51:54:05:B7:1E:68:A5:38:CD:A7:D3:E5:37:F2"
+    ]
+  }
+}]
