@@ -44,6 +44,9 @@
 
   var params = new URLSearchParams(location.search);
   var id = params.get("itineraryId");
+  // A "+" in the base64 id turns into a space if a hop decoded the query;
+  // the app restores it the same way.
+  if (id) id = id.replace(/ /g, "+");
   var host = params.get("host");
   if (host === null || host === "") host = DEFAULT_HOST;
 
