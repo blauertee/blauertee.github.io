@@ -40,13 +40,10 @@
 (function () {
   var HOST_RE = /^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*(:\d{1,5})?$/;
   var DEFAULT_HOST = "api.transitous.org";
-  var PACKAGE = "io.github.blauertee.transportia";
 
   var params = new URLSearchParams(location.search);
-  var id = params.get("itineraryId");
-  // A "+" in the base64 id turns into a space if a hop decoded the query;
-  // the app restores it the same way.
-  if (id) id = id.replace(/ /g, "+");
+  // `+` in the base64 id comes back as a space when a link was half-decoded.
+  var id = (params.get("itineraryId") || "").replace(/ /g, "+");
   var host = params.get("host");
   if (host === null || host === "") host = DEFAULT_HOST;
 
@@ -63,7 +60,7 @@
   q.set("itineraryId", id);
   q.set("host", host);
   var intent = "intent://trip?" + q.toString() +
-    "#Intent;scheme=motis;package=" + PACKAGE +
+    "#Intent;scheme=motis" +
     ";S.browser_fallback_url=" + encodeURIComponent(web) + ";end";
 
   document.getElementById("app").href = intent;
